@@ -7,3 +7,4 @@ geopandas
 pyproj
 plotly
 fiona
+io
