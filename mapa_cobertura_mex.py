@@ -462,5 +462,3 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	st.plotly_chart(fig,use_container_width=True)
 else:
 	print('error')
-
-display streamlit map
