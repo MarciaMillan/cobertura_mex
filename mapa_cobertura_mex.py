@@ -237,17 +237,18 @@ def get_sum_of_points_by_commune(query):
   conn.close()
   return df
 
-query_sum =  '''SELECT COUNT(distinct id)
+query_sum =  '''SELECT commune, COUNT(distinct id)
   FROM missions mi
   WHERE created_at at time zone 'utc' at time zone 'America/Mexico_City'>='{}'
   and created_at at time zone 'utc' at time zone 'America/Mexico_City' <= '{}' and deleted = 0 and country='México'
   and campain_id in ('2661','2246','2384','2124','1688','2181','2182','2177','2327','2379','2269','2431','1734','2065','2662','1750','1732','1689','1654','1653','1633','1946','2663','1666','1392','2557','2572','1768','2655','2658','2657','2624','2622','2623','2659','1424','1491','1980','2805','2806','1978','2069','2070','2630','2696','2695','2536','2693','1813','2676','2690','2176','2673','2045','2731','1464','1883','1675','2580','1923','2094','2748','2575','2122','1841','2842','2844','2843','2625','2626','2796','2149','2675','2479','2387','1592','2802','2804','2750','2848','2799','1947','1948','2009','2433','2889','2891','2962','2890','2999','2998','2995','3128','3127','2044','2062','2901','2902','2068','1465','2063','2064','1467','2380','2381','2382','2618','2631','2632','2898','1979','2131','2677','2126','2378','3126','3123','3398','3367','3108','3157','2319','3238',
 '3237','3236') and commune in {} and quote_state not in ('requested','quantified')
   and state in ('approved','taken','disapproved')
-  GROUP BY commune '''.format(start_date,end_date,tuple(comunas))
+  GROUP BY commune 
+  ORDER BY commune ASC'''.format(start_date,end_date,tuple(comunas))
 
 suma_por_comuna= get_sum_of_points_by_commune(query_sum)
-suma_por_comuna=suma_por_comuna.sort_values(by='commune')
+#suma_por_comuna=suma_por_comuna.sort_values(by='commune')
 
 
 if str(comuna) != '' and (start_date > end_date) == False:
