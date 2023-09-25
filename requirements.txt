@@ -1,9 +1,2 @@
-requests
-shapely
-pandas
-pytz
-geopandas
-pyproj
-plotly
 fiona
-io
+
