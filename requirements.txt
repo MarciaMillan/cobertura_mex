@@ -2,3 +2,5 @@ fiona
 shapely
 psycopg2-binary
 geopandas
+pyproj
+plotly.graph_objs 
