@@ -447,11 +447,11 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	#st.write(select_polygons)
 	#st.write("DataFrame de conteo de puntos fuera de polígonos:")
 	#st.write(counts)
-	col1, col2 = st.beta_columns(2)
+	
 	#st.write(suma_por_comuna)
 	#st.write(result)
-	col1.write(suma_por_comuna)
-	col2.write(result)
+	st.write([suma_por_comuna,result])
+	
 
 
 	fig.update_layout(legend=dict(
