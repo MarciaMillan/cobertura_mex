@@ -252,6 +252,7 @@ suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango ur
 suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
 suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'name', 'count':'Dentro de la comuna'})
 ambos= pd.merge(suma_por_comuna, result, on='name')
+ambos['Fuera del poligono']= ambos['Dentro de la Comuna'] - ambos['Dentro del rango']
 
 if str(comuna) != '' and (start_date > end_date) == False:
 	data_query_app = '''SELECT
@@ -440,10 +441,6 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	#st.write(select_polygons)
 	#st.write("DataFrame de conteo de puntos fuera de polígonos:")
 	#st.write(counts)
-	st.write('Misiones por comuna: ')
-	st.write(suma_por_comuna)
-	st.write('Misiones dentro del rango: ')
-	st.write(result)
 	st.write(ambos)		
 	
 	
