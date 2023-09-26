@@ -220,7 +220,7 @@ gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 #df="Rangos_Urbanos.kml"
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
 result = kml_to_list(gdf, points_all_missions)
-result= result.sort_values(by='name')
+result= result.rename(columns= {'inside_count': 'Dentro del rango})
 
 
 
@@ -250,7 +250,8 @@ query_sum =  '''SELECT commune, COUNT(distinct id)
 suma_por_comuna= get_sum_of_points_by_commune(query_sum)
 suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango urbano {x}")
 suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
-suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'name'})
+suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'name', 'count':'Dentro de la comuna'})
+ambos= pd.merge(suma_por_comuna, result, on='name')
 
 if str(comuna) != '' and (start_date > end_date) == False:
 	data_query_app = '''SELECT
@@ -443,6 +444,7 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	st.write(suma_por_comuna)
 	st.write('Misiones dentro del rango: ')
 	st.write(result)
+	st.write(ambos)		
 	
 	
 
