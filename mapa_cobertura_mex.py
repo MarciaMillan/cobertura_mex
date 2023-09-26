@@ -91,7 +91,7 @@ def kml_to_list(df, all_missions):
         name = df['Name'][i]
         description = df['Description'][i]
         polygon = df['geometry'][i]
-        name = name.lower().replace('rango urbano ', '').strip()
+        name = name.lower()#.replace('rango urbano ', '').strip()
 
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
             for polygon_obj in list(polygon.geoms):
@@ -248,8 +248,8 @@ query_sum =  '''SELECT commune, COUNT(distinct id)
   ORDER BY commune ASC'''.format(start_date,end_date,tuple(comunas))
 
 suma_por_comuna= get_sum_of_points_by_commune(query_sum)
-suma_por_comuna['commune']=suma_por_comuna["commune"].apply(lambda x: f"rango urbano {x}")
-suma_por_comuna.commune.lower()
+suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango urbano {x}")
+suma_por_comuna['commune']=suma_por_comuna['commune'].lower()
 
 if str(comuna) != '' and (start_date > end_date) == False:
 	data_query_app = '''SELECT
