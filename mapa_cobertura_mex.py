@@ -252,7 +252,7 @@ suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango ur
 suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
 suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'name', 'count':'Dentro de la comuna'})
 ambos= pd.merge(suma_por_comuna, result, on='name')
-ambos['Fuera del poligono']= ambos['Dentro de la Comuna'] - ambos['Dentro del rango']
+ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
 
 if str(comuna) != '' and (start_date > end_date) == False:
 	data_query_app = '''SELECT
