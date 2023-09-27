@@ -441,7 +441,7 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	#display streamlit map
   #diplay el contador por zona
 	st.write('Total de misiones dentro de la comuna:', dentro_comuna)
-	st.write('Cantidad de misiones fuera del rango urbano:', fuera_poligono)
+	#st.write('Cantidad de misiones fuera del rango urbano:', fuera_poligono)
 	#st.write(select_polygons)
 	#st.write("DataFrame de conteo de puntos fuera de polígonos:")
 	#st.write(counts)
