@@ -255,7 +255,7 @@ suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
 suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'name', 'count':'Dentro de la comuna'})
 ambos= pd.merge(suma_por_comuna, result, on='name')
 ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
-st.write(ambos)	
+
 
 
 
