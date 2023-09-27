@@ -26,6 +26,37 @@ import plotly.graph_objs as go
 import itertools
 
 st.set_page_config(page_title=None, page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
+
+def select_query(query):
+	try:
+		conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com",
+				port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
+		cur = conn.cursor()
+		cur.execute(query)
+		query_array = cur.fetchall()
+	except (Exception, psycopg2.Error) as error:
+		print("Error while fetching data from PostgreSQL", error)
+	finally:
+		if conn:
+			cur.close()
+			conn.close()
+	return query_array
+
+
+
+@st.cache_data#(allow_output_mutation=True)
+def query2tableApprove(query):
+	conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
+	cur = conn.cursor()
+	def create_pandas_table(sql_query, database = conn):
+		table = pd.read_sql_query(sql_query, database)
+		return table
+	info = create_pandas_table(query)
+	df = pd.DataFrame(info)
+	cur.close()
+	conn.close()
+	return df
+
 def kml_to_list(df, all_missions):
     sectores = []
 
@@ -197,36 +228,6 @@ ambos= pd.merge(suma_por_comuna, result, on='name')
 ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
 st.write(ambos)	
 
-def select_query(query):
-	try:
-		conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com",
-				port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
-		cur = conn.cursor()
-		cur.execute(query)
-		query_array = cur.fetchall()
-	except (Exception, psycopg2.Error) as error:
-		print("Error while fetching data from PostgreSQL", error)
-	finally:
-		if conn:
-			cur.close()
-			conn.close()
-	return query_array
-
-
-
-@st.cache_data#(allow_output_mutation=True)
-def query2tableApprove(query):
-	conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
-	cur = conn.cursor()
-	def create_pandas_table(sql_query, database = conn):
-		table = pd.read_sql_query(sql_query, database)
-		return table
-	info = create_pandas_table(query)
-	df = pd.DataFrame(info)
-	cur.close()
-	conn.close()
-	return df
-
 @st.cache_data#(allow_output_mutation=True)
 def query2tableDisapprove(query):
 	conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
@@ -252,6 +253,8 @@ def query2tableTaken(query):
 	cur.close()
 	conn.close()
 	return df
+	
+
 
 
 
