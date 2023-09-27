@@ -256,6 +256,13 @@ def query2tableTaken(query):
 	conn.close()
 	return df
 	
+#Contador de puntos
+def count_points_outside_polygon(polygon, points):
+	points_inside = points[points.within(polygon)]
+	points_outside = points[~points.isin(points_inside)]
+	outside_count = len(points_outside)
+	return outside_count
+	
 
 
 
@@ -444,8 +451,8 @@ if str(comuna) != '' and (start_date > end_date) == False:
 
 	#display streamlit map
   #diplay el contador por zona
-	#st.write('Total de misiones dentro de la comuna:', inside_count)
-	#st.write('Cantidad de misiones fuera del rango urbano:', outside_count)
+	st.write('Total de misiones dentro de la comuna:', inside_count)
+	st.write('Cantidad de misiones fuera del rango urbano:', outside_count)
 	#st.write(select_polygons)
 	#st.write("DataFrame de conteo de puntos fuera de polígonos:")
 	#st.write(counts)
