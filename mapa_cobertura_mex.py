@@ -455,7 +455,7 @@ if str(comuna) != '' and (start_date > end_date) == False:
     y=0.99,
     xanchor="left",
     x=0.01,
-    title=dict(text=f"Puntos fuera del rango urbano: {outside_count}")))
+    title=dict(text=f"Puntos fuera del rango urbano: {fuera_poligono}")))
 	st.plotly_chart(fig,use_container_width=True)
 else:
 	print('error')
