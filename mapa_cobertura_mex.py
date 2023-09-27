@@ -256,17 +256,6 @@ def query2tableTaken(query):
 	conn.close()
 	return df
 	
-#Contador de puntos
-def count_points_outside_polygon(polygon, points):
-	points_inside = points[points.within(polygon)]
-	points_outside = points[~points.isin(points_inside)]
-	outside_count = len(points_outside)
-	return outside_count
-	
-
-
-
-
 
 
 if str(comuna) != '' and (start_date > end_date) == False:
@@ -394,9 +383,9 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	selected_polygon = map_df.geometry.iloc[0]
 	points_inside_comuna = points_app[points_app.commune == comuna]
 	#Contador de misiones dentro de la comuna
-	inside_count = len(points_inside_comuna)
+	dentro_comuna = len(points_inside_comuna)
 	points_outside_polygon = points_inside_comuna[~points_inside_comuna.geometry.within(selected_polygon)]
-	outside_count = len(points_outside_polygon)
+	fuera_poligono = len(points_outside_polygon)
 	#misiones=gpd.GeoDataFrame(data_app, geometry=gpd.points_from_xy(data_app.longitude, data_app.latitude))
 	#select_polygons(polygons, misiones, comunas)
 	#points_inside_comuna=gpd.GeoDataFrame(data_app, geometry=gpd.points_from_xy(data_app.longitude, data_app.latitude))
@@ -451,8 +440,8 @@ if str(comuna) != '' and (start_date > end_date) == False:
 
 	#display streamlit map
   #diplay el contador por zona
-	st.write('Total de misiones dentro de la comuna:', inside_count)
-	st.write('Cantidad de misiones fuera del rango urbano:', outside_count)
+	st.write('Total de misiones dentro de la comuna:', dentro_comuna)
+	st.write('Cantidad de misiones fuera del rango urbano:', fuera_poligono)
 	#st.write(select_polygons)
 	#st.write("DataFrame de conteo de puntos fuera de polígonos:")
 	#st.write(counts)
