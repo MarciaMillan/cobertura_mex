@@ -449,7 +449,7 @@ if str(comuna) != '' and (start_date > end_date) == False:
 	#st.write(select_polygons)
 	#st.write("DataFrame de conteo de puntos fuera de polígonos:")
 	#st.write(counts)
-	st.write(ambos)		
+		
 	
 	
 
