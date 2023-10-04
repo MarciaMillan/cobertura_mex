@@ -194,6 +194,7 @@ gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
 result = kml_to_list(gdf, points_all_missions)
 result=result[result['inside_count'] != 0]
+result['name'] = result['name'].str.replace('\xa0', ' ')
 result= result.rename(columns= {'inside_count': 'Dentro del rango'})
 
 
