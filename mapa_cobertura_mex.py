@@ -109,7 +109,7 @@ def kml_to_dataframe_outside(df, mdf):
                 outside_polygon = False  # Set to False if the point is inside any polygon
                 break
 
-        if not outside_polygon:
+        if outside_polygon:
             if city in city_point_counts:
                 city_point_counts[city] += 1
             else:
@@ -118,6 +118,7 @@ def kml_to_dataframe_outside(df, mdf):
     results_df = pd.DataFrame(city_point_counts.items(), columns=['City', 'Count'])
 
     return results_df
+
 
 
 
