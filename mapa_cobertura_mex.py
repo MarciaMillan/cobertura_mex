@@ -57,81 +57,15 @@ def query2tableApprove(query):
 	conn.close()
 	return df
 
-def kml_to_dataframe_outside(df, mdf):
+
+def kml_to_list(df, all_missions, matching_commune):
     sectores = []
 
     for i in range(len(df)):
         name = df['Name'][i]
         description = df['Description'][i]
         polygon = df['geometry'][i]
-        name = name.lower()  # .replace('rango urbano ', '').strip()
-
-        if not polygon.is_valid:
-            # Skip invalid polygons
-            continue
-
-        if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
-            for polygon_obj in list(polygon.geoms):
-                coords_array = polygon_obj.exterior.coords.xy
-                h = 0
-                list_coords = []
-                while h < len(coords_array[0]):
-                    x = coords_array[0][h]
-                    y = coords_array[1][h]
-                    list_coords.append((x, y))
-                    h = h + 1
-                sectores.append([name, description, Polygon(list_coords)])
-        elif str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'LineString':
-            pass
-        else:
-            coords_array = polygon.exterior.coords.xy
-            h = 0
-            list_coords = []
-            while h < len(coords_array[0]):
-                x = coords_array[0][h]
-                y = coords_array[1][h]
-                list_coords.append((x, y))
-                h = h + 1
-            sectores.append([name, description, Polygon(list_coords)])
-
-   
-    city_point_counts = {}
-
-    for i in range(len(mdf)):
-        point = Point(mdf['latitude'][i], mdf['longitude'][i])
-        city = mdf['commune'][i]
-
-        
-        outside_polygon = True  
-        for sector in sectores:
-            _, _, polygon = sector
-            if polygon.is_valid and not polygon.contains(point):
-                outside_polygon = False 
-                break
-
-        if outside_polygon:
-            if city in city_point_counts:
-                city_point_counts[city] += 1
-            else:
-                city_point_counts[city] = 1
-
-    results_df = pd.DataFrame(city_point_counts.items(), columns=['City', 'Count'])
-
-    return results_df
-
-
-
-
-
-'''
-def kml_to_list(df, all_missions):
-    sectores = []
-
-    for i in range(len(df)):
-        name = df['Name'][i]
-        description = df['Description'][i]
-        polygon = df['geometry'][i]
-        name = name.lower()#.replace('rango urbano ', '').strip()
+        name = name.lower().replace({'rango urbano ':' ', '\xa0': ' '}).strip()
 
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
             for polygon_obj in list(polygon.geoms):
@@ -158,27 +92,26 @@ def kml_to_list(df, all_missions):
             sectores.append([name, description, Polygon(list_coords)])
 
     results = []
-    #matching_commune = mi_per_commune
+    matching_commune = mi_per_commune
 
     for sector in sectores:
         name, description, polygon = sector
         points_inside_polygon = all_missions[all_missions.geometry.within(polygon)]
         points_outside_polygon = all_missions[~all_missions.geometry.within(polygon)]
 
-       # outside_count = len(points_outside_polygon) - matching_commune.filter(like=f'{name}').sum()
+        outside_count = len(points_outside_polygon) - matching_commune.filter(like=f'{name}').sum()
 
         result_df = pd.DataFrame({
             'name': name,
             #'description': description,
             'inside_count': len(points_inside_polygon),
-            #'outside_count': len(points_outside_polygon)
+            'outside_count': len(points_outside_polygon)
         }, index=[0])
 
         results.append(result_df)
 
     return pd.concat (results, ignore_index=True)
 
-'''
 
 today = datetime.now(pytz.timezone('America/Mexico_City')).date()
 before = today + timedelta(days=-180)
@@ -254,20 +187,6 @@ data_query_app_tabla='''SELECT
 
 points_all_missions = query2tableApprove(data_query_app_tabla)
 points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_from_xy(points_all_missions.longitude, points_all_missions.latitude))
-
-#mi_per_commune= get_sum_of_points_by_commune(query_sum)
-#mi_per_commune['commune']=mi_per_commune.commune.str.lower().str.strip()
-gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
-#df="Rangos_Urbanos.kml"
-#gdf = gpd.read_file("Rangos_Urbanos.kml")
-result = kml_to_dataframe_outside(gdf, points_all_missions)
-#result=result[result['inside_count'] != 0]
-#result['name'] = result['name'].str.replace('\xa0', ' ')
-result= result.rename(columns= {'Count': 'Dentro del rango', 'City':'Comuna'})
-#st.write(result)
-
-
-
 def get_sum_of_points_by_commune(query):
   conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
   cur = conn.cursor()
@@ -290,6 +209,21 @@ query_sum =  '''SELECT commune, COUNT(distinct id)
   GROUP BY commune 
   ORDER BY commune ASC'''.format(start_date,end_date,tuple(comunas))
 
+mi_per_commune= get_sum_of_points_by_commune(query_sum)
+mi_per_commune['commune']=mi_per_commune.commune.str.lower().str.strip()
+gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
+#df="Rangos_Urbanos.kml"
+#gdf = gpd.read_file("Rangos_Urbanos.kml")
+result = kml_to_dataframe_outside(gdf, points_all_missions, mi_per_commune)
+#result=result[result['inside_count'] != 0]
+#result['name'] = result['name'].str.replace('\xa0', ' ')
+result= result.rename(columns= {'Count': 'Dentro del rango', 'City':'Comuna'})
+#st.write(result)
+
+
+
+
+'''
 
 suma_por_comuna= get_sum_of_points_by_commune(query_sum)
 #suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango urbano {x}")
@@ -298,7 +232,7 @@ suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'Comuna', 'count':'
 ambos= pd.merge(suma_por_comuna, result, on='Comuna')
 ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
 st.write(ambos)	
-
+'''
 
 @st.cache_data#(allow_output_mutation=True)
 def query2tableDisapprove(query):
