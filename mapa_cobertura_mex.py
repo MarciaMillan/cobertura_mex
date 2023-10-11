@@ -198,7 +198,7 @@ result = kml_to_list(gdf, points_all_missions)
 result=result[result['inside_count'] != 0]
 result['name'] = result['name'].str.replace('\xa0', ' ')
 result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna', 'outside_count':'Fuera de polígono'})
-result['Comuna']= result['Comuna'].replace('rango urbano ', ' ').strip()
+result['Comuna']= result['Comuna'].replace('rango urbano ', '')
 st.write(result)
 
 def get_sum_of_points_by_commune(query):
