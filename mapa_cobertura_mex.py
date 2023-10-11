@@ -102,14 +102,14 @@ def kml_to_dataframe_outside(df, mdf):
         city = mdf['commune'][i]
 
         # Check if the mission falls inside any polygon
-        inside_polygon = False
+        outside_polygon = True  # Initialize as True
         for sector in sectores:
             _, _, polygon = sector
             if polygon.is_valid and polygon.contains(point):
-                inside_polygon = True
+                outside_polygon = False  # Set to False if the point is inside any polygon
                 break
 
-        if not inside_polygon:
+        if not outside_polygon:
             if city in city_point_counts:
                 city_point_counts[city] += 1
             else:
@@ -118,6 +118,7 @@ def kml_to_dataframe_outside(df, mdf):
     results_df = pd.DataFrame(city_point_counts.items(), columns=['City', 'Count'])
 
     return results_df
+
 
 
 
