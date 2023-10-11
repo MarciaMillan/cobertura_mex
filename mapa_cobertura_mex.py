@@ -105,7 +105,7 @@ def kml_to_dataframe_outside(df, mdf):
         outside_polygon = True  
         for sector in sectores:
             _, _, polygon = sector
-            if polygon.is_valid and polygon.contains(point):
+            if polygon.is_valid and not polygon.contains(point):
                 outside_polygon = False 
                 break
 
