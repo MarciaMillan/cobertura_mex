@@ -58,13 +58,15 @@ def query2tableApprove(query):
 	return df
 
 
-def kml_to_list(df, all_missions):
+import geopandas as gpd
+
+def kml_to_list(gdf, points_all_missions):
     sectores = []
 
-    for i in range(len(df)):
-        name = df['Name'][i]
-        description = df['Description'][i]
-        polygon = df['geometry'][i]
+    for i in range(len(gdf)):
+        name = gdf['Name'][i]
+        description = gdf['Description'][i]
+        polygon = gdf['geometry'][i]
         name = name.lower()#.replace('rango urbano ', '').strip()
 
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
@@ -92,16 +94,19 @@ def kml_to_list(df, all_missions):
             sectores.append([name, description, Polygon(list_coords)])
 
     results = []
-    unique_communes = all_missions['commune'].unique()
+    unique_communes = points_all_missions['commune'].unique()
 
     for commune in unique_communes:
-        mission_points_inside_commune = all_missions[all_missions['commune'] == commune]
-        mission_points_outside_commune = all_missions[all_missions['commune'] != commune]
+        mission_points_inside_commune = points_all_missions[points_all_missions['commune'] == commune]
+        mission_points_outside_commune = points_all_missions[points_all_missions['commune'] != commune]
 
-        # Obtenemos los puntos de la columna commune que no caen dentro de ninguno de los poligonos de sectores.
-        commune_points_outside_sectors = mission_points_outside_commune[~mission_points_outside_commune.geometry.within(sectores)]
+        # Convert the list of Polygon objects to a GeoSeries object.
+        sectores_gdf = gpd.GeoSeries(sectores, crs=points_all_missions.crs)
 
-        # Creamos un dataframe con el nombre de la columna commune y la cantidad de puntos que no caen dentro de ninguno de los poligonos de sectores.
+        # Get the points of the commune that do not fall within any of the sectors polygons.
+        commune_points_outside_sectors = mission_points_outside_commune[~mission_points_outside_commune.geometry.within(sectores_gdf)]
+
+        # Create a dataframe with the commune name and the number of points that do not fall within any of the sectors polygons.
         result_df = pd.DataFrame({
             'name': commune,
             'outside_count': len(commune_points_outside_sectors)
@@ -110,6 +115,7 @@ def kml_to_list(df, all_missions):
         results.append(result_df)
 
     return pd.concat (results, ignore_index=True)
+
 
 
 
