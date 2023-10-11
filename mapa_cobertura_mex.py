@@ -65,8 +65,7 @@ def kml_to_list(df, all_missions, matching_commune):
         name = df['Name'][i]
         description = df['Description'][i]
         polygon = df['geometry'][i]
-        name = name.lower().replace({'rango urbano ':' ', '\xa0': ' '}).strip()
-
+        name = name.lower().replace('rango urbano ', ' ').replace('\xa0', ' ').strip()
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
             for polygon_obj in list(polygon.geoms):
                 coords_array = polygon_obj.exterior.coords.xy
