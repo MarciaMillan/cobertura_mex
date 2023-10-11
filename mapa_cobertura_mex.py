@@ -58,7 +58,7 @@ def query2tableApprove(query):
 	return df
 
 
-def kml_to_list(df, all_missions, matching_commune):
+def kml_to_list(df, all_missions):
     sectores = []
 
     for i in range(len(df)):
@@ -91,20 +91,18 @@ def kml_to_list(df, all_missions, matching_commune):
             sectores.append([name, description, Polygon(list_coords)])
 
     results = []
-    matching_commune = mi_per_commune
-
+    
     for sector in sectores:
         name, description, polygon = sector
         points_inside_polygon = all_missions[all_missions.geometry.within(polygon)]
         points_outside_polygon = all_missions[~all_missions.geometry.within(polygon)]
 
-        outside_count = len(points_outside_polygon) - matching_commune.filter(like=f'{name}').sum()
 
         result_df = pd.DataFrame({
             'name': name,
             #'description': description,
             'inside_count': len(points_inside_polygon),
-            'outside_count': len(points_outside_polygon)
+            #'outside_count': len(points_outside_polygon)
         }, index=[0])
 
         results.append(result_df)
@@ -186,6 +184,18 @@ data_query_app_tabla='''SELECT
 
 points_all_missions = query2tableApprove(data_query_app_tabla)
 points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_from_xy(points_all_missions.longitude, points_all_missions.latitude))
+
+
+
+gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
+#df="Rangos_Urbanos.kml"
+#gdf = gpd.read_file("Rangos_Urbanos.kml")
+result = kml_to_list(gdf, points_all_missions)
+#result=result[result['inside_count'] != 0]
+#result['name'] = result['name'].str.replace('\xa0', ' ')
+result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna'})
+#st.write(result)
+
 def get_sum_of_points_by_commune(query):
   conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
   cur = conn.cursor()
@@ -208,30 +218,16 @@ query_sum =  '''SELECT commune, COUNT(distinct id)
   GROUP BY commune 
   ORDER BY commune ASC'''.format(start_date,end_date,tuple(comunas))
 
-mi_per_commune= get_sum_of_points_by_commune(query_sum)
-mi_per_commune['commune']=mi_per_commune.commune.str.lower().str.strip()
-gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
-#df="Rangos_Urbanos.kml"
-#gdf = gpd.read_file("Rangos_Urbanos.kml")
-result = kml_to_list(gdf, points_all_missions, mi_per_commune)
-#result=result[result['inside_count'] != 0]
-#result['name'] = result['name'].str.replace('\xa0', ' ')
-result= result.rename(columns= {'Count': 'Dentro del rango', 'City':'Comuna'})
-#st.write(result)
 
-
-
-
-'''
 
 suma_por_comuna= get_sum_of_points_by_commune(query_sum)
-#suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango urbano {x}")
-#suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
+suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango urbano {x}")
+suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
 suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'Comuna', 'count':'Dentro de la comuna'})
 ambos= pd.merge(suma_por_comuna, result, on='Comuna')
 ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
 st.write(ambos)	
-'''
+
 
 @st.cache_data#(allow_output_mutation=True)
 def query2tableDisapprove(query):
