@@ -228,7 +228,7 @@ points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_
 gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 #df="Rangos_Urbanos.kml"
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
-result = kml_to_list(gdf, points_all_missions)
+result = kml_to_commune_points_outside(gdf, points_all_missions)
 #result=result[result['inside_count'] != 0]
 #result['name'] = result['name'].str.replace('\xa0', ' ')
 #result= result.rename(columns= {'inside_count': 'Dentro del rango'})
