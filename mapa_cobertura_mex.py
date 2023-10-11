@@ -65,7 +65,7 @@ def kml_to_list(df, all_missions):
         name = df['Name'][i]
         description = df['Description'][i]
         polygon = df['geometry'][i]
-        name = name.lower().replace('rango urbano ', ' ').replace('\xa0', ' ').strip()
+        name = name.lower().replace('rango urbano ', ' ').strip()
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
             for polygon_obj in list(polygon.geoms):
                 coords_array = polygon_obj.exterior.coords.xy
@@ -188,11 +188,10 @@ points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_
 
 
 gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
-#df="Rangos_Urbanos.kml"
-#gdf = gpd.read_file("Rangos_Urbanos.kml")
+
 result = kml_to_list(gdf, points_all_missions)
-#result=result[result['inside_count'] != 0]
-#result['name'] = result['name'].str.replace('\xa0', ' ')
+result=result[result['inside_count'] != 0]
+result['name'] = result['name'].str.replace('\xa0', ' ')
 result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna'})
 #st.write(result)
 
