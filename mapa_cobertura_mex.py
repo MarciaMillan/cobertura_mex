@@ -214,7 +214,7 @@ mi_per_commune['commune']=mi_per_commune.commune.str.lower().str.strip()
 gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 #df="Rangos_Urbanos.kml"
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
-result = kml_to_dataframe_outside(gdf, points_all_missions, mi_per_commune)
+result = kml_to_list(gdf, points_all_missions, mi_per_commune)
 #result=result[result['inside_count'] != 0]
 #result['name'] = result['name'].str.replace('\xa0', ' ')
 result= result.rename(columns= {'Count': 'Dentro del rango', 'City':'Comuna'})
