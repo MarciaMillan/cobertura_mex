@@ -197,8 +197,9 @@ gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 result = kml_to_list(gdf, points_all_missions)
 result=result[result['inside_count'] != 0]
 result['name'] = result['name'].str.replace('\xa0', ' ')
+result['name']= result['name'].replace('rango urbano ', ' ')
 result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna', 'outside_count':'Fuera de polígono'})
-result['Comuna']= result['Comuna'].replace('rango urbano ', '')
+
 st.write(result)
 
 def get_sum_of_points_by_commune(query):
@@ -231,7 +232,7 @@ query_sum =  '''SELECT commune, COUNT(distinct id)
 #suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'Comuna', 'count':'Dentro de la comuna'})
 #ambos= pd.merge(suma_por_comuna, result, on='Comuna')
 
-st.write(ambos)	
+
 
 
 @st.cache_data#(allow_output_mutation=True)
