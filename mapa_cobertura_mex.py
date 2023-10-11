@@ -65,7 +65,7 @@ def kml_to_list(df, all_missions):
         name = df['Name'][i]
         description = df['Description'][i]
         polygon = df['geometry'][i]
-        name = name.lower()#.replace('rango urbano ', ' ').strip()
+        name = name.lower()  # .replace('rango urbano ', ' ').strip()
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
             for polygon_obj in list(polygon.geoms):
                 coords_array = polygon_obj.exterior.coords.xy
@@ -91,28 +91,27 @@ def kml_to_list(df, all_missions):
             sectores.append([name, description, Polygon(list_coords)])
 
     results = []
-    
+
     for sector in sectores:
-    name, description, polygon = sector
-    matching_missions = all_missions[all_missions['commune'] == name]
-    count_matching_missions = len(matching_missions)
-    
-    # Now you can use count_matching_missions for further processing
-    points_inside_polygon = matching_missions[matching_missions.geometry.within(polygon)]
-    points_outside_polygon = matching_missions[~matching_missions.geometry.within(polygon)]
+        name, description, polygon = sector
+        matching_missions = all_missions[all_missions['commune'] == name]
+        count_matching_missions = len(matching_missions)
 
-
+        # Now you can use count_matching_missions for further processing
+        points_inside_polygon = matching_missions[matching_missions.geometry.within(polygon)]
+        points_outside_polygon = matching_missions[~matching_missions.geometry.within(polygon)]
 
         result_df = pd.DataFrame({
             'name': name,
-            #'description': description,
+            # 'description': description,
             'inside_count': len(points_inside_polygon),
             'outside_count': len(points_outside_polygon)
         }, index=[0])
 
         results.append(result_df)
 
-    return pd.concat (results, ignore_index=True)
+    return pd.concat(results, ignore_index=True)
+
 
 
 today = datetime.now(pytz.timezone('America/Mexico_City')).date()
@@ -199,7 +198,7 @@ result = kml_to_list(gdf, points_all_missions)
 result=result[result['inside_count'] != 0]
 result['name'] = result['name'].str.replace('\xa0', ' ')
 result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna'})
-#st.write(result)
+st.write(result)
 
 def get_sum_of_points_by_commune(query):
   conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
