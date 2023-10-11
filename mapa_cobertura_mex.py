@@ -58,49 +58,59 @@ def query2tableApprove(query):
 	return df
 
 
+def kml_to_list(df, all_missions):
+    sectores = []
 
-def kml_to_commune_points_outside(df, all_missions):
-    commune_points_outside = {}  # Create a dictionary to store the count of points not inside any polygon for each commune
+    for i in range(len(df)):
+        name = df['Name'][i]
+        description = df['Description'][i]
+        polygon = df['geometry'][i]
+        name = name.lower()#.replace('rango urbano ', '').strip()
 
-    for i in range(len(all_missions)):
-        point = all_missions['geometry'].iloc[i]  # Get the geometry of the mission point
+        if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
+            for polygon_obj in list(polygon.geoms):
+                coords_array = polygon_obj.exterior.coords.xy
+                h = 0
+                list_coords = []
+                while h < len(coords_array[0]):
+                    x = coords_array[0][h]
+                    y = coords_array[1][h]
+                    list_coords.append((x, y))
+                    h = h + 1
+                sectores.append([name, description, Polygon(list_coords)])
+        elif str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'LineString':
+            pass
+        else:
+            coords_array = polygon.exterior.coords.xy
+            h = 0
+            list_coords = []
+            while h < len(coords_array[0]):
+                x = coords_array[0][h]
+                y = coords_array[1][h]
+                list_coords.append((x, y))
+                h = h + 1
+            sectores.append([name, description, Polygon(list_coords)])
 
-        # Create a flag to track if the point is inside any polygon
-        any_point_inside = False
+    results = []
+    unique_communes = all_missions['commune'].unique()
 
-        for j in range(len(df)):
-            name = df['Name'].iloc[j]
-            polygon = df['geometry'].iloc[j]
+    for commune in unique_communes:
+        mission_points_inside_commune = all_missions[all_missions['commune'] == commune]
+        mission_points_outside_commune = all_missions[all_missions['commune'] != commune]
 
-            if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
-                for polygon_obj in list(polygon.geoms):
-                    polygon_coords = list(polygon_obj.exterior.coords)
-                    polygon = Polygon(polygon_coords)
-                    if point.within(polygon):
-                        any_point_inside = True
-                        break
-            elif str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'LineString':
-                pass
-            else:
-                polygon_coords = list(polygon.exterior.coords)
-                polygon = Polygon(polygon_coords)
-                if point.within(polygon):
-                    any_point_inside = True
+        # Obtenemos los puntos de la columna commune que no caen dentro de ninguno de los poligonos de sectores.
+        commune_points_outside_sectors = mission_points_outside_commune[~mission_points_outside_commune.geometry.within(sectores)]
 
-            if any_point_inside:
-                break
+        # Creamos un dataframe con el nombre de la columna commune y la cantidad de puntos que no caen dentro de ninguno de los poligonos de sectores.
+        result_df = pd.DataFrame({
+            'name': commune,
+            'outside_count': len(commune_points_outside_sectors)
+        }, index=[0])
 
-        # If the point is not inside any polygon, count it as outside
-        if not any_point_inside:
-            if name not in commune_points_outside:
-                commune_points_outside[name] = 1
-            else:
-                commune_points_outside[name] += 1
+        results.append(result_df)
 
-    # Create a DataFrame with the commune and points_outside columns
-    commune_df = pd.DataFrame(commune_points_outside.items(), columns=['commune', 'points_outside'])
+    return pd.concat (results, ignore_index=True)
 
-    return commune_df
 
 
 '''
@@ -240,7 +250,7 @@ points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_
 gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 #df="Rangos_Urbanos.kml"
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
-result = kml_to_commune_points_outside(gdf, points_all_missions)
+result = kml_to_list(gdf, points_all_missions)
 #result=result[result['inside_count'] != 0]
 #result['name'] = result['name'].str.replace('\xa0', ' ')
 #result= result.rename(columns= {'inside_count': 'Dentro del rango'})
