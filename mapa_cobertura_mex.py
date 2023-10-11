@@ -263,8 +263,8 @@ gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 result = kml_to_dataframe_outside(gdf, points_all_missions)
 #result=result[result['inside_count'] != 0]
 #result['name'] = result['name'].str.replace('\xa0', ' ')
-result= result.rename(columns= {'count': 'Dentro del rango', 'City':'Comuna'})
-st.write(result)
+result= result.rename(columns= {'Count': 'Dentro del rango', 'City':'Comuna'})
+#st.write(result)
 
 
 
