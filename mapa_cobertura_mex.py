@@ -115,8 +115,7 @@ def kml_to_list(df, mdf):
             else:
                 city_point_counts[city] = 1
 
-    results = [[city, count] for city, count in city_point_counts.items()]
-
+    results = pd.DataFrame(city_point_counts.items(), columns=['City', 'Count'])
     return results
 
 
