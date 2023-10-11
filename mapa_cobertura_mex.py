@@ -57,7 +57,65 @@ def query2tableApprove(query):
 	conn.close()
 	return df
 
+def kml_to_list(df, mdf):
+    sectores = []
 
+    for i in range(len(df)):
+        name = df['Name'][i]
+        description = df['Description'][i]
+        polygon = df['geometry'][i]
+        name = name.lower()#.replace('rango urbano ', '').strip()
+
+        if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
+            for polygon_obj in list(polygon.geoms):
+                coords_array = polygon_obj.exterior.coords.xy
+                h = 0
+                list_coords = []
+                while h < len(coords_array[0]):
+                    x = coords_array[0][h]
+                    y = coords_array[1][h]
+                    list_coords.append((x, y))
+                    h = h + 1
+                sectores.append([name, description, Polygon(list_coords)])
+        elif str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'LineString':
+            pass
+        else:
+            coords_array = polygon.exterior.coords.xy
+            h = 0
+            list_coords = []
+            while h < len(coords_array[0]):
+                x = coords_array[0][h]
+                y = coords_array[1][h]
+                list_coords.append((x, y))
+                h = h + 1
+            sectores.append([name, description, Polygon(list_coords)])
+
+    # Create a dictionary to store the point counts per city
+    city_point_counts = {}
+
+    for i in range(len(mdf)):
+        point = Point(mdf['latitude'][i], mdf['longitude'][i])
+        city = mdf['commune'][i]
+
+        # Check if the point falls inside any of the polygons
+        inside_polygon = False
+        for sector in sectores:
+            _, _, polygon = sector
+            if polygon.contains(point):
+                inside_polygon = True
+                break
+
+        if not inside_polygon:
+            # Update the point count for the city
+            if city in city_point_counts:
+                city_point_counts[city] += 1
+            else:
+                city_point_counts[city] = 1
+
+    # Convert the point counts dictionary to a list of lists
+    results = [[city, count] for city, count in city_point_counts.items()]
+
+    return results
 
 
 
