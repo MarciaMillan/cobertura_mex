@@ -60,33 +60,42 @@ def query2tableApprove(query):
 
 
 def kml_to_commune_points_outside(df, all_missions):
-    commune_points_outside = {}  # Step 1
+    # Create a dictionary to store the count of points not inside any polygon for each commune
+    commune_points_outside = {}
 
     for i in range(len(df)):
         name = df['Name'][i]
         polygon = df['geometry'][i]
 
+        # Create a flag to track if any point is inside the current polygon
+        any_point_inside = False
+
         if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
             for polygon_obj in list(polygon.geoms):
                 polygon_coords = list(polygon_obj.exterior.coords)
                 polygon = Polygon(polygon_coords)
-                points_outside = all_missions[~all_missions.geometry.within(polygon)]
-                if name not in commune_points_outside:
-                    commune_points_outside[name] = len(points_outside)
-                else:
-                    commune_points_outside[name] += len(points_outside)
+                points_inside = all_missions[all_missions.geometry.within(polygon)]
+                if not points_inside.empty:
+                    any_point_inside = True
+                    break
         elif str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'LineString':
             pass
         else:
             polygon_coords = list(polygon.exterior.coords)
             polygon = Polygon(polygon_coords)
-            points_outside = all_missions[~all_missions.geometry.within(polygon)]
-            if name not in commune_points_outside:
-                commune_points_outside[name] = len(points_outside)
-            else:
-                commune_points_outside[name] += len(points_outside)
+            points_inside = all_missions[all_missions.geometry.within(polygon)]
+            if not points_inside.empty:
+                any_point_inside = True
 
-    commune_df = pd.DataFrame(commune_points_outside.items(), columns=['commune', 'points_outside'])  # Step 3
+        # If no point is inside the polygon, count the points as outside
+        if not any_point_inside:
+            if name not in commune_points_outside:
+                commune_points_outside[name] = len(all_missions)
+            else:
+                commune_points_outside[name] += len(all_missions)
+
+    # Create a DataFrame with the commune and points_outside columns
+    commune_df = pd.DataFrame(commune_points_outside.items(), columns=['commune', 'points_outside'])
 
     return commune_df
 
