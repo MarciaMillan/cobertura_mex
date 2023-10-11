@@ -193,7 +193,7 @@ result = kml_to_list(gdf, points_all_missions)
 result=result[result['inside_count'] != 0]
 result['name'] = result['name'].str.replace('\xa0', ' ')
 result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna'})
-#st.write(result)
+st.write(result)
 
 def get_sum_of_points_by_commune(query):
   conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
@@ -224,7 +224,7 @@ suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango ur
 suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
 suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'Comuna', 'count':'Dentro de la comuna'})
 ambos= pd.merge(suma_por_comuna, result, on='Comuna')
-ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
+
 st.write(ambos)	
 
 
