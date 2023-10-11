@@ -57,7 +57,7 @@ def query2tableApprove(query):
 	conn.close()
 	return df
 
-def kml_to_list(df, mdf):
+def kml_to_dataframe_outside(df, mdf):
     sectores = []
 
     for i in range(len(df)):
@@ -94,14 +94,14 @@ def kml_to_list(df, mdf):
                 h = h + 1
             sectores.append([name, description, Polygon(list_coords)])
 
-    # Diccionario que guarda el conteo de misiones por comuna
+    # Dictionary to store the count of points outside of any polygon
     city_point_counts = {}
 
     for i in range(len(mdf)):
         point = Point(mdf['latitude'][i], mdf['longitude'][i])
         city = mdf['commune'][i]
 
-        # Chequea si la misión cae dentro de algún polígono
+        # Check if the mission falls inside any polygon
         inside_polygon = False
         for sector in sectores:
             _, _, polygon = sector
@@ -115,8 +115,9 @@ def kml_to_list(df, mdf):
             else:
                 city_point_counts[city] = 1
 
-    results = pd.DataFrame(city_point_counts.items(), columns=['City', 'Count'])
-    return results
+    results_df = pd.DataFrame(city_point_counts.items(), columns=['City', 'Count'])
+
+    return results_df
 
 
 
