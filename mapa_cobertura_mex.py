@@ -57,6 +57,45 @@ def query2tableApprove(query):
 	conn.close()
 	return df
 
+
+
+def kml_to_commune_points_outside(df, all_missions):
+    commune_points_outside = {}  # Step 1
+
+    for i in range(len(df)):
+        name = df['Name'][i]
+        polygon = df['geometry'][i]
+
+        if str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'MultiPolygon':
+            for polygon_obj in list(polygon.geoms):
+                polygon_coords = list(polygon_obj.exterior.coords)
+                polygon = Polygon(polygon_coords)
+                points_outside = all_missions[~all_missions.geometry.within(polygon)]
+                if name not in commune_points_outside:
+                    commune_points_outside[name] = len(points_outside)
+                else:
+                    commune_points_outside[name] += len(points_outside)
+        elif str(type(polygon)).replace('>', '').replace("'", '').split(".")[-1] == 'LineString':
+            pass
+        else:
+            polygon_coords = list(polygon.exterior.coords)
+            polygon = Polygon(polygon_coords)
+            points_outside = all_missions[~all_missions.geometry.within(polygon)]
+            if name not in commune_points_outside:
+                commune_points_outside[name] = len(points_outside)
+            else:
+                commune_points_outside[name] += len(points_outside)
+
+    commune_df = pd.DataFrame(commune_points_outside.items(), columns=['commune', 'points_outside'])  # Step 3
+
+    return commune_df
+
+# Example usage:
+result_df = kml_to_commune_points_outside(df, all_missions)
+print(result_df)
+
+
+'''
 def kml_to_list(df, all_missions):
     sectores = []
 
@@ -111,7 +150,7 @@ def kml_to_list(df, all_missions):
 
     return pd.concat (results, ignore_index=True)
 
-
+'''
 
 today = datetime.now(pytz.timezone('America/Mexico_City')).date()
 before = today + timedelta(days=-180)
@@ -164,6 +203,7 @@ emails_to_taken="'"+"','".join(selected_emails_taken)+"'"
 
 
 #EMPIEZA ACA
+
 data_query_app_tabla='''SELECT
     id,headquarter_street,commune,split_part(headquarter_location,',',1)::float as latitude,split_part(headquarter_location,',',2)::float as longitude,
   campain_id,state,
@@ -193,13 +233,13 @@ gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
 #df="Rangos_Urbanos.kml"
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
 result = kml_to_list(gdf, points_all_missions)
-result=result[result['inside_count'] != 0]
-result['name'] = result['name'].str.replace('\xa0', ' ')
-result= result.rename(columns= {'inside_count': 'Dentro del rango'})
+#result=result[result['inside_count'] != 0]
+#result['name'] = result['name'].str.replace('\xa0', ' ')
+#result= result.rename(columns= {'inside_count': 'Dentro del rango'})
+st.write(result)
 
 
-
-
+'''
 def get_sum_of_points_by_commune(query):
   conn = psycopg2.connect(host="rocketpin-bi.ckgzkrdcz2xh.us-east-1.rds.amazonaws.com", port = 5432, database="rocketpin_bi", user="rocketpin", password="4yZ784OGLqi94wLwONTD")
   cur = conn.cursor()
@@ -221,7 +261,7 @@ query_sum =  '''SELECT commune, COUNT(distinct id)
   and state = 'approved'
   GROUP BY commune 
   ORDER BY commune ASC'''.format(start_date,end_date,tuple(comunas))
-
+'''
 suma_por_comuna= get_sum_of_points_by_commune(query_sum)
 suma_por_comuna['commune']=suma_por_comuna['commune'].apply(lambda x: f"rango urbano {x}")
 suma_por_comuna['commune']=suma_por_comuna['commune'].str.lower()
@@ -229,8 +269,7 @@ suma_por_comuna= suma_por_comuna.rename(columns= {'commune': 'name', 'count':'De
 ambos= pd.merge(suma_por_comuna, result, on='name')
 ambos['Fuera del poligono']= ambos['Dentro de la comuna'] - ambos['Dentro del rango']
 st.write(ambos)	
-
-
+'''
 
 @st.cache_data#(allow_output_mutation=True)
 def query2tableDisapprove(query):
