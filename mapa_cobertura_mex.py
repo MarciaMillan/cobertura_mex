@@ -93,9 +93,14 @@ def kml_to_list(df, all_missions):
     results = []
     
     for sector in sectores:
-        name, description, polygon = sector
-        points_inside_polygon = all_missions[all_missions.geometry.within(polygon)]
-        points_outside_polygon = all_missions[~all_missions.geometry.within(polygon)]
+    name, description, polygon = sector
+    matching_missions = all_missions[all_missions['commune'] == name]
+    count_matching_missions = len(matching_missions)
+    
+    # Now you can use count_matching_missions for further processing
+    points_inside_polygon = matching_missions[matching_missions.geometry.within(polygon)]
+    points_outside_polygon = matching_missions[~matching_missions.geometry.within(polygon)]
+
 
 
         result_df = pd.DataFrame({
@@ -184,7 +189,8 @@ data_query_app_tabla='''SELECT
 
 points_all_missions = query2tableApprove(data_query_app_tabla)
 points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_from_xy(points_all_missions.longitude, points_all_missions.latitude))
-
+points_all_missions['commune']= points_all_missions['commune'].apply(lambda x: f"rango urbano {x}")
+points_all_missions['commune']=points_all_missions['commune'].str.lower()
 
 
 gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
