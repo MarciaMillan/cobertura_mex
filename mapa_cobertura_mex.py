@@ -90,10 +90,6 @@ def kml_to_commune_points_outside(df, all_missions):
 
     return commune_df
 
-# Example usage:
-result_df = kml_to_commune_points_outside(df, all_missions)
-print(result_df)
-
 
 '''
 def kml_to_list(df, all_missions):
@@ -230,7 +226,7 @@ points_all_missions = gpd.GeoDataFrame(points_all_missions, geometry=gpd.points_
 #mi_per_commune= get_sum_of_points_by_commune(query_sum)
 #mi_per_commune['commune']=mi_per_commune.commune.str.lower().str.strip()
 gdf = gpd.read_file(urllib.request.urlopen(urban_ranges_kml))
-df="Rangos_Urbanos.kml"
+#df="Rangos_Urbanos.kml"
 #gdf = gpd.read_file("Rangos_Urbanos.kml")
 result = kml_to_list(gdf, points_all_missions)
 #result=result[result['inside_count'] != 0]
