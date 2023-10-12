@@ -91,6 +91,7 @@ def kml_to_list(df, all_missions):
             sectores.append([name, description, Polygon(list_coords)])
 
     count_outside_all = {}
+
     for mission in all_missions.itertuples():
         mission_polygon = mission.geometry
         commune_name = mission.commune
@@ -105,6 +106,7 @@ def kml_to_list(df, all_missions):
 
             if mission_polygon.within(sector_polygon):
                 is_outside_all_sectors = False
+                
 
         if is_outside_all_sectors:
             count_outside_all[commune_name] += 1
@@ -116,7 +118,7 @@ def kml_to_list(df, all_missions):
         matching_missions = all_missions[all_missions['commune'] == name]
         count_matching_missions = len(matching_missions)
 
-        # Now you can use count_matching_missions for further processing
+        
         points_inside_polygon = matching_missions[matching_missions.geometry.within(polygon)]
         points_outside_polygon = matching_missions[~matching_missions.geometry.within(polygon)]
 
@@ -131,6 +133,7 @@ def kml_to_list(df, all_missions):
         results.append(result_df)
 
     return pd.concat(results, ignore_index=True)
+
 
 
 
