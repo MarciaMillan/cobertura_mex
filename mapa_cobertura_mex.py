@@ -222,7 +222,7 @@ result = kml_to_list(gdf, points_all_missions)
 result=result[result['inside_count'] != 0]
 result['name'] = result['name'].str.replace('\xa0', ' ')
 result['name']= result['name'].str.replace('rango urbano ', ' ')
-result= result.rename(columns= {'inside_count': 'Dentro del rango', 'name':'Comuna', 'outside_count':'Fuera de polígono'})
+result= result.rename(columns= {'inside_count': 'Dentro del polígono', 'name':'Comuna', 'outside_count':'Fuera de polígono correspondiente', 'count_outside_all': 'Fuera de cualquier P'})
 
 st.write(result)
 
