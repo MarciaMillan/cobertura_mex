@@ -127,7 +127,7 @@ def kml_to_list(df, all_missions):
             # 'description': description,
             'inside_count': len(points_inside_polygon),
             'outside_count': len(points_outside_polygon),
-            'count_outside_all': count_outside_all[name]
+            'count_outside_all': count_outside_all.get(name, 0)
         }, index=[0])
 
         results.append(result_df)
