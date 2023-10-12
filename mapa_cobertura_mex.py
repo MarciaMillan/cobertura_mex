@@ -90,6 +90,25 @@ def kml_to_list(df, all_missions):
                 h = h + 1
             sectores.append([name, description, Polygon(list_coords)])
 
+    count_outside_all = {}
+    for mission in all_missions.itertuples():
+        mission_polygon = mission.geometry
+        commune_name = mission.commune
+
+        if commune_name not in count_outside_all:
+            count_outside_all[commune_name] = 0
+
+        is_outside_all_sectors = True
+
+        for sector in sectores:
+            _, _, sector_polygon = sector
+
+            if mission_polygon.within(sector_polygon):
+                is_outside_all_sectors = False
+
+        if is_outside_all_sectors:
+            count_outside_all[commune_name] += 1
+
     results = []
 
     for sector in sectores:
@@ -105,12 +124,14 @@ def kml_to_list(df, all_missions):
             'name': name,
             # 'description': description,
             'inside_count': len(points_inside_polygon),
-            'outside_count': len(points_outside_polygon)
+            'outside_count': len(points_outside_polygon),
+            'count_outside_all': count_outside_all[name]
         }, index=[0])
 
         results.append(result_df)
 
     return pd.concat(results, ignore_index=True)
+
 
 
 
